@@ -5,6 +5,7 @@ from django.db.models import F
 from django.template import loader
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
+from django.views import generic
 
 # Using a template
 def index(request: HttpRequest) -> HttpResponse:
@@ -69,3 +70,24 @@ def vote(request: HttpRequest, question_id: int):
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect(reverse("polls:results", args=(question.id,)))
+
+
+# ------------------ Using  generic views ----------------- #
+
+class IndexView(generic.ListView):
+    template_name = "polls/index.html"
+    context_object_name = "latest_question_list"
+
+    def get_queryset(self):
+        """Return the last five published questions."""
+        return Question.objects.order_by("-publication_date")[:5]
+
+
+class DetailView(generic.DetailView):
+    model = Question
+    template_name = "polls/detail.html"
+
+
+class ResultsView(generic.DetailView):
+    model = Question
+    template_name = "polls/results.html"
